@@ -89,8 +89,12 @@
         modal.classList.remove("flex");
       }
       async function confirmDelete() {
-        const email = document.getElementById("email").value;
-        const password = document.getElementById("password").value;
+        const emailInput = document.getElementById("email");
+        const passwordInput = document.getElementById("password");
+        const modal = document.getElementById("deleteModal");
+
+        const email = emailInput.value;
+        const password = passwordInput.value;
 
         try {
           const response = await fetch(
@@ -105,18 +109,26 @@
           );
 
           const data = await response.json();
+
           if (response.ok) {
-            alert("Account deleted successfully");
+            // Close modal first
+            modal.classList.add("hidden");
+            modal.classList.remove("flex");
+
+            // Reset fields
             emailInput.value = "";
             passwordInput.value = "";
-            closeModal();
+
+            alert("Account deleted successfully");
           } else {
             alert(data.message || "Delete failed");
           }
         } catch (error) {
+          console.error(error);
           alert("Server error");
         }
       }
+
       function togglePassword(inputId, icon) {
         const input = document.getElementById(inputId);
         input.type = input.type === "password" ? "text" : "password";
