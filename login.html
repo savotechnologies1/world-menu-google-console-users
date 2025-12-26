@@ -7,11 +7,9 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
     />
-
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="./config.js"></script>
   </head>
-
   <body class="min-h-screen flex items-center justify-center bg-gray-100 px-4">
     <div class="w-full max-w-md bg-white p-8 rounded-xl shadow-lg">
       <h2 class="text-2xl font-bold text-center mb-6">Sign In</h2>
@@ -21,49 +19,84 @@
           type="email"
           id="email"
           placeholder="Email Address"
-          class="w-full border px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+          class="w-full border px-4 py-2 rounded focus:ring-2 focus:ring-blue-500"
           required
         />
+
         <div class="relative">
           <input
             type="password"
             id="password"
             placeholder="Password"
-            class="w-full border px-4 py-2 pr-10 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            class="w-full border px-4 py-2 pr-10 rounded focus:ring-2 focus:ring-blue-500"
             required
           />
           <i
-            class="fa-solid fa-eye absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-gray-500 hover:text-black"
+            class="fa-solid fa-eye absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer"
             onclick="togglePassword('password', this)"
           ></i>
         </div>
-        <button
-          type="submit"
-          class="w-full bg-black text-white py-2 rounded hover:bg-black transition"
-        >
+
+        <button type="submit" class="w-full bg-black text-white py-2 rounded">
           Login
         </button>
       </form>
-
-      <div class="flex justify-center text-sm mt-4">
-        <a href="register.html" class="text-blue-600">Create account</a>
-      </div>
     </div>
 
+    <div
+      id="deleteModal"
+      class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center"
+    >
+      <div class="bg-white rounded-xl p-6 w-full max-w-sm">
+        <h3 class="text-xl font-bold text-center mb-4 text-red-600">
+          Delete Account
+        </h3>
+
+        <p class="text-center text-gray-600 mb-6">
+          Are you sure you want to delete your account? This action cannot be
+          undone.
+        </p>
+
+        <div class="flex gap-4">
+          <button onclick="closeModal()" class="w-1/2 border py-2 rounded">
+            Cancel
+          </button>
+
+          <button
+            onclick="confirmDelete()"
+            class="w-1/2 bg-red-600 text-white py-2 rounded"
+          >
+            Yes, Delete
+          </button>
+        </div>
+      </div>
+    </div>
     <script>
+      let authToken = "";
       const form = document.getElementById("loginForm");
-
-      form.addEventListener("submit", async function (e) {
+      form.addEventListener("submit", function (e) {
         e.preventDefault();
-
+        openModal();
+      });
+      function openModal() {
+        const modal = document.getElementById("deleteModal");
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+      }
+      function closeModal() {
+        const modal = document.getElementById("deleteModal");
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+      }
+      async function confirmDelete() {
         const email = document.getElementById("email").value;
         const password = document.getElementById("password").value;
 
         try {
           const response = await fetch(
-            `${window.ENV.API_URL}/auth/login-google-console-user`,
+            `${window.ENV.API_URL}/auth/delete-google-console-user`,
             {
-              method: "POST",
+              method: "DELETE",
               headers: {
                 "Content-Type": "application/json",
               },
@@ -72,32 +105,23 @@
           );
 
           const data = await response.json();
-
-          if (data.success) {
-            alert("Login Successful");
-            localStorage.setItem("token", data.data.token);
-            localStorage.setItem("user", JSON.stringify(data.data));
-
-            window.location.href = "user.html";
+          if (response.ok) {
+            alert("Account deleted successfully");
+            emailInput.value = "";
+            passwordInput.value = "";
+            closeModal();
           } else {
-            alert(data.message || "Login failed");
+            alert(data.message || "Delete failed");
           }
         } catch (error) {
           alert("Server error");
         }
-      });
+      }
       function togglePassword(inputId, icon) {
         const input = document.getElementById(inputId);
-
-        if (input.type === "password") {
-          input.type = "text";
-          icon.classList.remove("fa-eye");
-          icon.classList.add("fa-eye-slash");
-        } else {
-          input.type = "password";
-          icon.classList.remove("fa-eye-slash");
-          icon.classList.add("fa-eye");
-        }
+        input.type = input.type === "password" ? "text" : "password";
+        icon.classList.toggle("fa-eye");
+        icon.classList.toggle("fa-eye-slash");
       }
     </script>
   </body>
