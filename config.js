@@ -1,3 +1,3 @@
 window.ENV = {
-  API_URL: "http://localhost:5005/api",
+  API_URL: "https://www.world-menu.server24.in/api",
 };
